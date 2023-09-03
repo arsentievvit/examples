@@ -1,0 +1,20 @@
+variable "example" {
+  description = "Example variable"
+  # Незаданная переменная без дефолтного значения
+  # Его нужно задать в .tfvars файле
+}
+
+variable "string" {
+  description = "String variable"
+  type = string
+  default = "example"
+  # Строковая переменная со значением example
+  # по-умолчанию
+}
+
+variable "num" {
+  description = "Number variable"
+  type = number
+  default = 9000
+  # Переменная типа number с дефолтным значением 9000
+}
