@@ -1,20 +1,12 @@
-variable "example" {
+variable "yandex_folder_id" {
   description = "Example variable"
-  # Незаданная переменная без дефолтного значения
-  # Его нужно задать в .tfvars файле
 }
 
-variable "string" {
-  description = "String variable"
+variable "service_account_key_file" {
+  description = "JSON ключ для доступа сервисного аккаунта editor в необходимом каталоге"
   type = string
-  default = "example"
-  # Строковая переменная со значением example
-  # по-умолчанию
 }
 
-variable "num" {
-  description = "Number variable"
-  type = number
-  default = 9000
-  # Переменная типа number с дефолтным значением 9000
+variable "folder_id" {
+  description = "Дефолтный каталог для работы terraform в облаке"
 }

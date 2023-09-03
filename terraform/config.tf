@@ -27,8 +27,8 @@ terraform {
 # для работы с Яндекс облаком
 
 provider "yandex" {
-  token     = "<OAuth или статический ключ сервисного аккаунта>"
-  cloud_id  = "<идентификатор облака>"
-  folder_id = "<идентификатор каталога>"
-  zone      = "ru-central1-a"
+  service_account_key_file = var.service_account_key_file
+  cloud_id                 = var.cloud_id
+  folder_id                = var.folder_id
+  zone                     = var.zone
 }
