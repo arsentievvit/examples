@@ -3,6 +3,7 @@ resource "yandex_compute_image" "ubuntu" {
 }
 
 resource "yandex_compute_instance" "bhost" {
+  hostname = "bastion-1"
   name = "bastion-1"
   platform_id = "standard-v1"
   metadata = {
@@ -37,6 +38,7 @@ resource "yandex_compute_instance" "bhost" {
 }
 
 resource "yandex_compute_instance" "test-vm" {
+  hostname = "test-vm"
   name = "test-vm"
   platform_id = "standard-v1"
   metadata = {
