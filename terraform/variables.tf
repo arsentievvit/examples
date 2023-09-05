@@ -24,3 +24,12 @@ variable "ssh_key_file" {
 variable "ssh_private_key_file" {
   default = null
 }
+
+variable "inventory" {
+  default = "./inventory.ini"
+}
+
+variable "group_name" {
+  description = "Default group name"
+  type = string
+}

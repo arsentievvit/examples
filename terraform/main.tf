@@ -38,8 +38,9 @@ resource "yandex_compute_instance" "bhost" {
 }
 
 resource "yandex_compute_instance" "test-vm" {
-  hostname = "test-vm"
-  name = "test-vm"
+  count = 2
+  hostname = "${group_name}-${count.index}"
+  name = "${group_name}-${count.index}"
   platform_id = "standard-v1"
   metadata = {
     ssh-keys = "ubuntu:${file(var.ssh_key_file)}"
@@ -75,5 +76,14 @@ resource "yandex_compute_instance" "test-vm" {
     host        = self.network_interface[0].ip_address
     agent       = false
     private_key = file(var.ssh_private_key_file)
+  }
+  provisioner "local-exec" {
+    name = "Insert group name into inventory file"
+    inline = ["echo '${group_name}' > ${inventory}"]
+  }
+
+  provisioner "local-exec" {
+    name = "Insert output to inventory file"
+    inline = [ "echo '${self.network_interface[0].ip_address}' >> ${inventory}" ]
   }
 }
