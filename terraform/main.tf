@@ -1,34 +1,9 @@
-data "yandex_compute_image" "def-ubuntu" {
-  family = "ubuntu-2004-lts"
+resource "yandex_compute_image" "ubuntu" {
+  source_family = "ubuntu-2204-lts"
 }
 
-resource "yandex_compute_instance" "bastion" {
-  name        = "bastion"
-  platform_id = "standard-v1"
-  metadata = {
-    ssh-keys = "ubuntu:${file(var.ssh_key_file)}"
-  }
-  resources {
-    cores         = 2
-    memory        = 2
-    core_fraction = 100
-  }
-  network_interface {
-    nat       = true
-    subnet_id = var.subnet_id
-  }
-  boot_disk {
-    initialize_params {
-      image_id = data.yandex_compute_image.def-ubuntu.id
-      size     = "10"
-      type     = "network-hdd"
-    }
-  }
-}
-
-resource "yandex_compute_instance" "app" {
-  count       = 2
-  name        = "reddit-app-${count.index}"
+resource "yandex_compute_instance" "bhost" {
+  name = "bastion-1"
   platform_id = "standard-v1"
   metadata = {
     ssh-keys = "ubuntu:${file(var.ssh_key_file)}"
@@ -41,35 +16,62 @@ resource "yandex_compute_instance" "app" {
 
   network_interface {
     nat       = true
-    subnet_id = var.subnet_id
+    subnet_id = yandex_vpc_subnet.public.id
+    ip_address = "172.31.2.254"
   }
   scheduling_policy {
     preemptible = true
   }
   boot_disk {
     initialize_params {
-      image_id = var.image_id
-      size     = "15"
-      type     = "network-hdd"
+      image_id = yandex_compute_image.ubuntu.id
     }
   }
-  provisioner "file" {
-    source      = "files/puma.service"
-    destination = "/tmp/puma.service"
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    host        = self.network_interface[0].nat_ip_address
+    agent       = false
+    private_key = file(var.ssh_private_key_file)
+  }
+}
+
+resource "yandex_compute_instance" "test-vm" {
+  name = "test-vm"
+  platform_id = "standard-v1"
+  metadata = {
+    ssh-keys = "ubuntu:${file(var.ssh_key_file)}"
+  }
+  resources {
+    cores         = 2
+    memory        = 2
+    core_fraction = 100
+  }
+
+  network_interface {
+    nat       = false
+    subnet_id = yandex_vpc_subnet.internal.id
+  }
+  scheduling_policy {
+    preemptible = true
+  }
+  boot_disk {
+    initialize_params {
+      image_id = yandex_compute_image.ubuntu.id
+    }
   }
   provisioner "remote-exec" {
-    script = "files/deploy.sh"
+    inline = ["sudo apt update -y && sudo apt upgrade -y"]
   }
   connection {
-    bastion_host        = yandex_compute_instance.bastion.network_interface[0].nat_ip_address
-    bastion_port        = 22
-    bastion_user        = "ubuntu"
-    bastion_private_key = file(var.ssh_key_private_file)
+    bastion_host = yandex_compute_instance.bhost.network_interface[0].nat_ip_address
+    bastion_user = "ubuntu"
+    bastion_private_key = file(var.ssh_private_key_file)
 
     type        = "ssh"
     user        = "ubuntu"
     host        = self.network_interface[0].ip_address
     agent       = false
-    private_key = file(var.ssh_key_private_file)
+    private_key = file(var.ssh_private_key_file)
   }
 }
