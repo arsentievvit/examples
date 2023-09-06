@@ -28,5 +28,5 @@ resource "yandex_vpc_subnet" "public" {
   name = "public"
   description = "Used for public instances"
   network_id = yandex_vpc_network.vpc.id
-  v4_cidr_blocks = ["172.31..0/24"]
+  v4_cidr_blocks = ["172.31.2.0/24"]
 }
